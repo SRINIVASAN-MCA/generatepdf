@@ -1,0 +1,28 @@
+ .img-preview {
+     width: 100%;
+     max-width: 300px;
+     /* Desktop max-width */
+     height: 200px;
+     /* Desktop fixed height */
+     object-fit: cover;
+     display: none;
+     border-radius: 8px;
+     border: 1px solid #ddd;
+ }
+
+ /* Mobile responsive adjustments */
+ @media (max-width: 768px) {
+     .img-preview {
+         max-width: 100%;
+         height: 180px;
+         /* Tablet view */
+     }
+ }
+
+ @media (max-width: 480px) {
+     .img-preview {
+         max-width: 100%;
+         height: 150px;
+         /* Small mobile screens */
+     }
+ }
