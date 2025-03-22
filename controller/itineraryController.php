@@ -30,6 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $flight = $_POST['flight'] ?? '';
 
     // Handle image uploads
+    // var_dump($folder,"fffffff");
     function uploadImage($file, $folder)
     {
         if (!empty($file['tmp_name'])) {
@@ -46,6 +47,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         return "";
     }
+
+    // $tourImageURL = isset($_FILES['tourImages']) ? uploadImage($_FILES['tourImages'], "Travels2020") : "";
+    // $flightImageURL = isset($_FILES['flightimages']) ? uploadImage($_FILES['flightimages'], "Travels2020") : "";
 
     $tourImageURL = uploadImage($_FILES['tourImages'], "Travels2020");
     $flightImageURL = uploadImage($_FILES['flightimages'], "Travels2020");

@@ -5,6 +5,7 @@ use Mpdf\Mpdf;
 
 $tourId = $_GET['id'] ?? '';
 
+
 if (!empty($tourId) && is_numeric($tourId)) {
     try {
         $mpdf = new Mpdf([
@@ -30,6 +31,8 @@ if (!empty($tourId) && is_numeric($tourId)) {
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
+        // var_dump($row['tour_image']);
+        // die();
 
         if (!$row) {
             throw new Exception("No records found for Tour ID: " . htmlspecialchars($tourId));
@@ -61,7 +64,6 @@ if (!empty($tourId) && is_numeric($tourId)) {
             ";
 
         // Header Image
-        // $html .= '<div><img src="images/Header.jpg" width="100%" /></div>';
         $html .= '<a href="http://www.travels2020.com"><img src="images/Header.jpg" width="100%" /></a>';
 
 
@@ -124,9 +126,7 @@ if (!empty($tourId) && is_numeric($tourId)) {
         if (!empty($row['cost']) && is_string($row['cost'])) {
             $html .= "<div style='margin-bottom: 20px; padding: 5px;'><h2>LAND PACKAGE COST:</h2>" . $row['cost'] . "</div>";
         }
-        // if (!empty($row['cost']) && is_string($row['cost'])) {
-        //     $html .= "<h2>LAND PACKAGE COST:</h2>" . $row['cost'] . "<br><br>";
-        // }
+        
         // hotel Section
         if (!empty($row['hotel']) && is_string($row['hotel'])) {
             $html .= "<h2>Hotel Details:</h2>" . $row['hotel'];
@@ -154,7 +154,7 @@ if (!empty($tourId) && is_numeric($tourId)) {
             <table width='100%' border='0' style='border-collapse: collapse; border: none;'>
                 <tr>
                     <td width='15%' align='left' style='border: none;'>
-                        <img src='images/pothy.png' width='100' height='100' style='border-radius: 50%;' alt='Avatar'>
+                        <img src='images/pothy.jpg' width='100' height='100' style='border-radius: 50%;' alt='Avatar'>
                     </td>
                     <td width='55%' align='center' style='border: none;'>
                         <p>Your trip is planned by travels2020 <br />Anbu Pothy <br/><span> 1500+ trips planned</span></p>
@@ -196,14 +196,11 @@ if (!empty($tourId) && is_numeric($tourId)) {
         </div>";
 
         // Footer Image
-        // $html .= '<div><img src="images/Footer.jpg" width="100%" /></div>';
         $html .= '<a href="https://www.google.com/maps/place/Travels2020/@12.9901923,80.2539563,17z/data=!3m1!4b1!4m6!3m5!1s0x3a525d799e2de9e9:0xb9c456c8c7ba873d!8m2!3d12.9901923!4d80.2539563!16s%2Fg%2F11bcdznhzc?entry=ttu&g_ep=EgoyMDI1MDIwMy4wIKXMDSoASAFQAw%3D%3D">
         <img src="images/Footer.jpg" width="100%" style="margin-top:40px;" /></a>';
 
         // Add content to PDF
         $mpdf->WriteHTML($html);
-        // $mpdf->Output($row['username'] . ($row['tour_name']) . ".pdf", "D");
-        // $filename = "Mr." . $row['username'] . "-" . $row['tour_name'] . ".pdf";
         $filename = "Mr. " . $row['username'] . "-" . $row['tour_name'] . 
             " (" . $nights . " Nights / " . $duration . " Days) Package.pdf";
 

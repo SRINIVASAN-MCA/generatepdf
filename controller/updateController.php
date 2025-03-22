@@ -17,7 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_GET['id'])) {
 
     // Retrieve and sanitize form data
     $id = intval($_GET['id']);
-    $tripId = trim($_POST['tripId'] ?? '');
     $userName = trim($_POST['userName'] ?? '');
     $tourName = trim($_POST['tourName'] ?? '');
     $checkIn = trim($_POST['checkIn'] ?? '');
@@ -31,6 +30,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_GET['id'])) {
     $hotel = trim($_POST['hotel'] ?? '');
     $flight = trim($_POST['flight'] ?? '');
 
+    // Fetch existing `trip_id` and images from the database
+    $query = $conn->prepare("SELECT trip_id, tour_image, ftimage FROM tour_booking WHERE id = ?");
+    if (!$query) {
+        echo json_encode(["success" => false, "message" => "Database Error: " . $conn->error]);
+        exit;
+    }
+    
+    $query->bind_param("i", $id);
+    $query->execute();
+    $query->bind_result($existingTripId, $existingTourImage, $existingFlightImage);
+    
+    if (!$query->fetch()) {
+        echo json_encode(["success" => false, "message" => "Error: No record found for the given ID."]);
+        exit;
+    }
+    
+    $query->close();
+    $tripId = $existingTripId; // Always keep the existing trip_id
+
     // Function to handle image uploads
     function uploadImage($file, $folder)
     {
@@ -42,29 +60,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_GET['id'])) {
                 ]);
                 return $upload["secure_url"] ?? "";
             } catch (Exception $e) {
-                echo json_encode(["success" => false, "message" => $e->getMessage()]);
+                echo json_encode(["success" => false, "message" => "Image Upload Error: " . $e->getMessage()]);
                 exit;
             }
         }
         return "";
     }
 
-    // Fetch existing image URLs from the database
-    $query = $conn->prepare("SELECT tour_image, ftimage, officer_image FROM tour_booking WHERE id = ?");
-    $query->bind_param("i", $id);
-    $query->execute();
-    $query->bind_result($existingTourImage, $existingFlightImage, $existingOfficerImage);
-    $query->fetch();
-    $query->close();
-
-    // Handle image uploads only if a new image is provided, otherwise keep the existing one
+    // Handle image uploads only if a new image is provided
     $tourImageURL = !empty($_FILES['tourImages']['tmp_name']) ? uploadImage($_FILES['tourImages'], "Travels2020") : $existingTourImage;
     $flightImageURL = !empty($_FILES['flightimages']['tmp_name']) ? uploadImage($_FILES['flightimages'], "Travels2020") : $existingFlightImage;
-    $officerImageURL = !empty($_FILES['officerimages']['tmp_name']) ? uploadImage($_FILES['officerimages'], "Travels2020") : $existingOfficerImage;
 
-    // **UPDATE EXISTING TOUR BOOKING RECORD** using prepared statements
+    // **Update query (trip_id remains unchanged)**
     $sql = "UPDATE tour_booking SET 
-                trip_id = ?, 
                 username = ?, 
                 tour_name = ?, 
                 check_in = ?, 
@@ -78,21 +86,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_GET['id'])) {
                 notes = ?, 
                 hotel = ?, 
                 flight = ?, 
-                ftimage = ?, 
-                officer_image = ? 
+                ftimage = ? 
             WHERE id = ?";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssiisssssssssi", 
-        $tripId, $userName, $tourName, $checkIn, $checkOut, 
+    if (!$stmt) {
+        echo json_encode(["success" => false, "message" => "SQL Error: " . $conn->error]);
+        exit;
+    }
+
+    $stmt->bind_param("sssssiisssssssi", 
+        $userName, $tourName, $checkIn, $checkOut, 
         $numAdults, $numChildren, $inclusion, $exclusion, 
         $cost, $tourImageURL, $notes, $hotel, $flight, 
-        $flightImageURL, $officerImageURL, $id
+        $flightImageURL, $id
     );
 
     if ($stmt->execute()) {
 
-        // **UPDATE VACATION SUMMARY**
+        // **Update Vacation Summary**
         if (isset($_POST['days']) && is_array($_POST['days'])) {
             foreach ($_POST['days'] as $key => $day) {
                 $stay = $day['stay'] ?? '';
@@ -102,6 +114,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_GET['id'])) {
 
                 // Fetch existing image from the database
                 $stmtFetch = $conn->prepare("SELECT image FROM vacation_summary WHERE fk_tour_booking = ? AND date = ?");
+                if (!$stmtFetch) {
+                    echo json_encode(["success" => false, "message" => "Vacation Summary Fetch Error: " . $conn->error]);
+                    exit;
+                }
+
                 $stmtFetch->bind_param("is", $id, $date);
                 $stmtFetch->execute();
                 $stmtFetch->bind_result($existingDayImage);
@@ -109,7 +126,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_GET['id'])) {
                 $stmtFetch->close();
 
                 // Handle day image upload
-                if (!empty($_FILES['days']['name'][$key]['vsImages'])) {
+                if (isset($_FILES['days']['tmp_name'][$key]['vsImages']) && !empty($_FILES['days']['tmp_name'][$key]['vsImages'])) {
                     $dayFile = $_FILES['days']['tmp_name'][$key]['vsImages'];
                     try {
                         // Upload the image to Cloudinary
@@ -119,24 +136,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_GET['id'])) {
                         ]);
                         $imageURL = $upload["secure_url"];
                     } catch (Exception $e) {
-                        echo json_encode(["success" => false, "message" => $e->getMessage()]);
+                        echo json_encode(["success" => false, "message" => "Vacation Image Upload Error: " . $e->getMessage()]);
                         exit;
                     }
                 } else {
                     $imageURL = $existingDayImage; // Keep existing image if no new upload
                 }
 
-                // **UPDATE VACATION SUMMARY**
+                // **Update Vacation Summary**
                 $stmtUpdate = $conn->prepare("UPDATE vacation_summary 
-                                            SET stay=?, image=?, itinerary_content=? 
-                                            WHERE fk_tour_booking=? AND date=?");
+                                              SET stay=?, image=?, itinerary_content=? 
+                                              WHERE fk_tour_booking=? AND date=?");
+                if (!$stmtUpdate) {
+                    echo json_encode(["success" => false, "message" => "Vacation Summary Update Error: " . $conn->error]);
+                    exit;
+                }
+
                 $stmtUpdate->bind_param("sssis", $stay, $imageURL, $itinerary, $id, $date);
                 $stmtUpdate->execute();
                 $stmtUpdate->close();
             }
         }
 
-        echo json_encode(["success" => true, "message" => "Updated Successfully"]);
+        echo json_encode(["success" => true, "message" => "Updated Successfully", "trip_id" => $tripId]);
     } else {
         echo json_encode(["success" => false, "message" => "Error in update: " . $stmt->error]);
     }

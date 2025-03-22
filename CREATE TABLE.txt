@@ -1,0 +1,56 @@
+CREATE TABLE IF NOT EXISTS `tour_booking` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `trip_id` varchar(100) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `tour_name` varchar(100) NOT NULL,
+  `check_in` date NOT NULL,
+  `check_out` date NOT NULL,
+  `adults` int NOT NULL,
+  `children` int NOT NULL,
+  `inclusion` text NOT NULL,
+  `exclusion` text NOT NULL,
+  `cost` text NOT NULL,
+  `tour_image` varchar(3000) DEFAULT NULL,
+  `notes` text NOT NULL,
+  `hotel` text NOT NULL,
+  `flight` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+CREATE TABLE IF NOT EXISTS `vacation_summary` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `stay` varchar(255) NOT NULL,
+  `date` date NOT NULL,
+  `image` varchar(255) NOT NULL,
+  `itinerary_content` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fk_tour_booking` int NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=435 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+
+CREATE TABLE IF NOT EXISTS `tour_booking` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `trip_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tour_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `check_in` date NOT NULL,
+  `check_out` date NOT NULL,
+  `adults` int NOT NULL,
+  `children` int NOT NULL,
+  `inclusion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `exclusion` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `cost` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tour_image` varchar(3000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `hotel` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `flight` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `ftimage` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+

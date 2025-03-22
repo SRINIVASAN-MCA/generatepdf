@@ -1,7 +1,8 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "Travels$$2020";
+$password = "";
+// $dbname = "generatepdf";
 $dbname = "travehwt_travels2020";
 
 // Create connection

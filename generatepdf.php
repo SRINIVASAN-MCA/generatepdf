@@ -1,7 +1,6 @@
 <?php
 require_once "database/db.php";
-require_once "vendor/autoload.php"; // Composer's autoload
-
+require_once "vendor/autoload.php"; 
 use Mpdf\Mpdf;
 
 $tourId = $_GET['id'] ?? '';
@@ -29,9 +28,6 @@ if (!empty($tourId) && is_numeric($tourId)) {
         $mpdf->SetHTMLHeader($header);
         $mpdf->SetHTMLFooter($footer);
 
-        // $mpdf->SetTopMargin(40); 
-        // $mpdf->Ln(25);
-
         // Fetch Tour Data
         $sql = "SELECT tb.*, vs.* FROM tour_booking tb 
                 LEFT JOIN vacation_summary vs ON vs.fk_tour_booking = tb.id 
@@ -53,8 +49,6 @@ if (!empty($tourId) && is_numeric($tourId)) {
 
         $whatsappLink = "https://wa.me/919445552020?text=" . urlencode("Hello, I would like to know more information about our tour " . $row['tour_name'] . " trip Id: " . $row['trip_id']);
         $razorpayLink = "https://pages.razorpay.com/travels2020";
-        // $whatsappIcon = "<img src='images/whatsApp_icon.png' width='20' height='20' style='vertical-align: middle;' alt='WhatsApp Icon'/>";
-        // HTML Content
         $html = "<style>                    
                 body { font-family: Arial, sans-serif; font-size: 12pt; }
                 h1 { text-align: center; font-size: 20pt; margin-bottom: 5px; font-weight: bold; color:rgb(11, 66, 105); }
@@ -111,7 +105,6 @@ if (!empty($tourId) && is_numeric($tourId)) {
         $stmtVacation->execute();
         $vacationResults = $stmtVacation->get_result()->fetch_all(MYSQLI_ASSOC);
         $dayCount = 1;
-        // $date = date('d-m-Y', strtotime($vacationRow['date']));
 
         foreach ($vacationResults as $vacationRow) {
             $formattedDate = date('d-m-Y', strtotime($vacationRow['date'])); // Format date
@@ -124,40 +117,29 @@ if (!empty($tourId) && is_numeric($tourId)) {
             $dayCount++;
         }
 
-        // $html .= "<pagebreak />";
-
-        /// Cost Section
-        $html .= "<h2 style='text-align: left; background-color: yellow; padding: 10px; margin: 10px 0;'>LAND PACKAGE COST: " . htmlspecialchars($row['cost']) . " per person</h2>";
-
+         // Cost Section
+         if (!empty($row['cost']) && is_string($row['cost'])) {
+            $html .= "<div style='margin-bottom: 20px; padding: 5px;'><h2>LAND PACKAGE COST:</h2>" . $row['cost'] . "</div>";
+        }
+        // hotel Section
         if (!empty($row['hotel']) && is_string($row['hotel'])) {
-            // $html .= "<h2>Hotel Details:</h2><p>" . nl2br(htmlspecialchars($row['hotel'], ENT_QUOTES)) . "</p>";
             $html .= "<h2>Hotel Details:</h2>" . $row['hotel'];
         }
 
-
+          // Flight Section
         if (!empty($row['flight']) && is_string($row['flight'])) {
             $html .= "<h2>Flight Details:</h2>" . $row['flight'];
-            // $html .= "<h1>" . strtoupper(htmlspecialchars($row['flight'])) . "</h1>";
 
             if (!empty($row['ftimage']) && filter_var($row['ftimage'], FILTER_VALIDATE_URL)) {
                 $html .= "<img src='" . htmlspecialchars($row['ftimage']) . "' width='100%' height='50%' />";
             }
         }
-
-
-        // if (!empty($row['flight']) && is_string($row['flight'])) {
-        //     $html .= "<h1>" . strtoupper(htmlspecialchars($row['flight'])) . "</h1>";
-        //     $html .= "<img src='" . htmlspecialchars($row['ftimage']) . "' width='100%' height='50%' />";
-        //     $html .= "<h2>flight Details:</h2><p>" . nl2br(htmlspecialchars($row['flight'])) . "</p>";
-        // }
-
+         // Inclusion & Exclusion  Section
         if (!empty($row['inclusion']) && !empty($row['exclusion'])) {
             $html .= "<h2>Inclusion:</h2>" . $row['inclusion'];
             $html .= "<h2>Exclusion:</h2>" . $row['exclusion'];
         }
-
-        // $html .= "<pagebreak />";
-
+         // Notes Section
         if (!empty($row['notes']) && is_string($row['notes'])) {
             $html .= "<h2>Important Notes:</h2>" . $row['notes'];
         }
@@ -167,7 +149,7 @@ if (!empty($tourId) && is_numeric($tourId)) {
     <table width='100%' border='0' style='border-collapse: collapse;'>
         <tr>
             <td width='15%' align='left' style='border: none;'>
-                <img src='images/pothy.png' width='100' height='100' style='border-radius: 50%;' alt='Avatar'>
+                <img src='images/pothy.jpg' width='100' height='100' style='border-radius: 50%;' alt='Avatar'>
             </td>
             <td width='55%' align='center' style='border: none;'>
                 <p>Your trip is planned by travels2020 <br />Anbu Pothy <br/><span>1500+ trips planned</span></p>
@@ -208,14 +190,14 @@ if (!empty($tourId) && is_numeric($tourId)) {
             </table>
         </div>";
 
-
-        // Footer Image
-        // $html .= '<img src="images/Footer.jpg" width="100%" style="margin-top:20px;" />';
-
         // Generate PDF
         $mpdf->WriteHTML($html);
         // $mpdf->Output($row['tour_name'] . "pdf", "D");
-        $mpdf->Output($row['username'] . ($row['tour_name']) . ".pdf", "D");
+        // $mpdf->Output($row['username'] . ($row['tour_name']) . ".pdf", "D");
+        $filename = "Mr. " . $row['username'] . "-" . $row['tour_name'] . 
+        " (" . $nights . " Nights / " . $duration . " Days) Package.pdf";
+
+    $mpdf->Output($filename, "D");
 
 
     } catch (Exception $e) {
