@@ -1,14 +1,27 @@
 <?php
-require_once "../database/db.php";
+require_once "../../database/db.php";
 
-$sql = "SELECT id, 	customer_name, mobile_number, email, tour_name, travel_from, travel_to, adults, children, cost  FROM customers_details ORDER BY id DESC";
-$result = $conn->query($sql);
+header("Content-Type: application/json; charset=UTF-8");
 
-$customer = [];
-while ($row = $result->fetch_assoc()) {
-    $customer[] = $row;
+// Ensure the database connection works
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Database connection failed"]);
+    exit;
 }
 
-header('Content-Type: application/json');
-echo json_encode($customer);
-?>
+$sql = "SELECT id, tour_name, travel_from, travel_to, adults, children FROM customers_details ORDER BY id DESC";
+$result = $conn->query($sql);
+
+if (!$result) {
+    echo json_encode(["success" => false, "message" => "Database query failed"]);
+    exit;
+}
+
+$customers = [];
+while ($row = $result->fetch_assoc()) {
+    $customers[] = $row;
+}
+
+// Ensure no other output exists before JSON encoding
+echo json_encode(["success" => true, "data" => $customers]);
+exit;

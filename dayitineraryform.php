@@ -49,7 +49,7 @@
                         </div>
                         <!-- Image Name -->
                         <div class="col-12 col-md-6 mb-3">
-                            <label class="form-label">Image (Max: 300px * 200px )</label>
+                            <label class="form-label">Map Image</label>
                             <input type="file" class="form-control image-upload" id="timages" name="timages"
                                 accept="image/*">
                             <div id="imagehide">
@@ -255,13 +255,7 @@
 
                         <button type="button" id="submitButton" class="btn btn-primary">Save</button>
                         <button type="button" id="updateButton" class="btn btn-primary">Update</button>
-                      
-                        <!-- PDF generation buttons -->
-                        <!-- <div class="mt-3">
-                            <button type="button" id="submitButtonsingle" class="btn btn-danger">Single PDF</button>
-                            <button type="button" id="submitButtonmultiple" class="btn btn-primary">Multiple
-                                PDF</button>
-                        </div> -->
+                    
                     </div>
 
                 </form>

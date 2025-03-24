@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_GET['id'])) {
         exit;
     }
 
-    $stmt->bind_param("sssssiisssssssi", 
+    $stmt->bind_param("ssssiissssssssi", 
         $userName, $tourName, $checkIn, $checkOut, 
         $numAdults, $numChildren, $inclusion, $exclusion, 
         $cost, $tourImageURL, $notes, $hotel, $flight, 

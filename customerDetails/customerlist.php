@@ -33,9 +33,9 @@
                 <thead class="table-primary">
                     <tr>
                         <th scope="col">S.No</th>
-                        <th scope="col">Username</th>
+                        <!-- <th scope="col">Username</th>
                         <th scope="col">Phone</th>
-                        <th scope="col">Email</th>
+                        <th scope="col">Email</th> -->
                         <th scope="col">Tour Name</th>
                         <th colspan="2">Traveling Dates</th>
                         <th colspan="2">No of Passengers</th>

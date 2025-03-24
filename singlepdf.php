@@ -5,6 +5,25 @@ use Mpdf\Mpdf;
 
 $tourId = $_GET['id'] ?? '';
 
+function convertPngToJpg($pngFile) {
+    if (!file_exists($pngFile)) {
+        return $pngFile; // Return original file if not found
+    }
+
+    // Generate new JPG filename
+    $jpgFile = str_replace('.png', '.jpg', $pngFile);
+
+    // Convert PNG to JPG
+    $image = imagecreatefrompng($pngFile);
+    if ($image) {
+        imagejpeg($image, $jpgFile, 100); // Save as JPG
+        imagedestroy($image);
+        return $jpgFile; // Return new JPG path
+    }
+
+    return $pngFile; // Return original if conversion fails
+}
+
 
 if (!empty($tourId) && is_numeric($tourId)) {
     try {
@@ -75,8 +94,13 @@ if (!empty($tourId) && is_numeric($tourId)) {
           </table>";
         // Tour Info
         $html .= "<h1>" . strtoupper(htmlspecialchars($row['tour_name'])) . "<br/><span> ( {$nights} Nights / {$duration} Days)</span></h1>";
-        $html .= "<img src='" . htmlspecialchars($row['tour_image']) . "' width='100%' height='50%' />";
-
+        // $html .= "<img src='" . htmlspecialchars($row['tour_image']) . "' width='100%' height='50%' />";
+        $tourImage = htmlspecialchars($row['tour_image']);
+        if (pathinfo($tourImage, PATHINFO_EXTENSION) == 'png') {
+            $tourImage = convertPngToJpg($tourImage);
+        }
+        $html .= "<img src='{$tourImage}' width='100%' height='50%' />";
+        
 
         $html .= "<div class='box'>
         <table width='100%'>
